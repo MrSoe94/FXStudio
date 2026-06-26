@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Audio & Voice FX Studio</title>
+  
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: #151f32;
+      --accent-color: #38bdf8;
+      --accent-vocal: #a855f7;
+      --accent-success: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --category-bg: #0f172a;
+      --border-color: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .rack-container {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      width: 100%;
+      max-width: 600px;
+      border: 1px solid var(--border-color);
+    }
+
+    h2 {
+      margin-bottom: 0.25rem;
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, var(--accent-color), var(--accent-vocal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    /* File Upload Section */
+    .file-uploader {
+      border: 2px dashed #334155;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.4);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      margin-bottom: 1.25rem;
+    }
+
+    .file-uploader:hover, .file-uploader.dragover {
+      border-color: var(--accent-color);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .file-uploader p {
+      font-size: 0.9rem;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+
+    .file-uploader span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .file-info-badge {
+      display: none;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: var(--accent-color);
+      word-break: break-all;
+    }
+
+    /* Visualizer & Audio Player */
+    .player-visualizer-container {
+      background-color: var(--category-bg);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--border-color);
+    }
+
+    canvas {
+      width: 100%;
+      height: 60px;
+      background-color: #020617;
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    audio {
+      width: 100%;
+      outline: none;
+    }
+
+    /* Master Processing */
+    .master-switch-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1.25rem;
+      border: 1px dashed #334155;
+    }
+
+    .master-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Category Blocks */
+    .category-section {
+      background-color: var(--category-bg);
+      border-radius: 1rem;
+      padding: 0.5rem;
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .category-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 0.25rem 0.5rem 0.5rem 0.5rem;
+      font-weight: 700;
+    }
+
+    /* FX Cards */
+    .fx-card {
+      background: rgba(255, 255, 255, 0.01);
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-left: 4px solid #475569;
+      transition: all 0.25s ease;
+    }
+
+    .fx-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .fx-card.active {
+      border-left-color: var(--accent-color);
+      background: rgba(56, 189, 248, 0.03);
+    }
+
+    .fx-card.vocal-fx.active {
+      border-left-color: var(--accent-vocal);
+      background: rgba(168, 85, 247, 0.03);
+    }
+
+    .fx-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .fx-title-block {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .fx-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .vocal-badge {
+      font-size: 0.65rem;
+      background: #6b21a8;
+      padding: 2px 6px;
+      border-radius: 20px;
+      color: #f3e8ff;
+      font-weight: bold;
+    }
+
+    /* Accordion Control Body */
+    .controls-body {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.25s ease-out, margin-top 0.25s ease, opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .fx-card.expanded .controls-body {
+      max-height: 150px;
+      margin-top: 0.75rem;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .control-row {
+      margin-bottom: 0.75rem;
+    }
+
+    .control-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .label-group {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    /* Sliders and Switches */
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+      accent-color: var(--accent-color);
+    }
+
+    .vocal-fx input[type="range"] {
+      accent-color: var(--accent-vocal);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+      z-index: 10;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider-toggle {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #475569;
+      transition: 0.2s;
+      border-radius: 20px;
+    }
+
+    .slider-toggle:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.2s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider-toggle {
+      background-color: var(--accent-color);
+    }
+
+    .vocal-fx input:checked + .slider-toggle {
+      background-color: var(--accent-vocal);
+    }
+
+    input:checked + .slider-toggle:before {
+      transform: translateX(18px);
+    }
+
+    /* Actions Buttons Area */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      border: none;
+      padding: 0.85rem 1rem;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      color: white;
+    }
+
+    .btn-export-audio {
+      background: linear-gradient(135deg, #059669, #10b981);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-export-audio:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-pipeline {
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-pipeline:hover {
+      background: #334155;
+    }
+
+    /* Pipeline Generator Code Block */
+    .generator-card {
+      display: none;
+      margin-top: 1.25rem;
+      background: var(--category-bg);
+      border-radius: 1rem;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .generator-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      background: #090d16;
+      color: #38bdf8;
+      border: 1px solid #1e293b;
+      border-radius: 0.5rem;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.75rem;
+      padding: 0.5rem;
+      resize: none;
+      outline: none;
+    }
+
+    /* Modal / Custom Notifications */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+      font-size: 0.85rem;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Simple Progress Overlay */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-left-color: var(--accent-success);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="rack-container">
+    <h2>Audio & Voice FX Studio</h2>
+    <div class="subtitle">Complete Pro vocal processing & environment rack</div>
+
+    <!-- Drag & Drop File Selector -->
+    <div class="file-uploader" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <input type="file" id="file-input" accept="audio/*" style="display: none;">
+      <p id="upload-status-text">🎵 Seret & Lepas file audio di sini, atau klik untuk memilih</p>
+      <span>Mendukung MP3, WAV, M4A, OGG, dll.</span>
+    </div>
+
+    <!-- Loaded File Info Badge -->
+    <div class="file-info-badge" id="file-badge"></div>
+
+    <!-- Visualizer & Real Audio Player -->
+    <div class="player-visualizer-container">
+      <canvas id="visualizer-canvas"></canvas>
+      <audio id="audioTrack" controls crossorigin="anonymous"></audio>
+    </div>
+
+    <!-- Master Switch -->
+    <div class="master-switch-box">
+      <span class="master-title">🎛️ Master FX Processing</span>
+      <label class="switch">
+        <input type="checkbox" id="toggle-global-master" checked />
+        <span class="slider-toggle" style="background-color: #ef4444"></span>
+      </label>
+    </div>
+
+    <!-- FX Rack Body -->
+    <div class="category-section">
+      <div class="category-title">Dynamics & Pitch</div>
+
+      <!-- Compressor -->
+      <div class="fx-card vocal-fx" id="card-compressor">
+        <div class="fx-header" onclick="toggleAccordion('card-compressor', event)">
+          <div class="fx-title-block">
+            <span class="fx-title">🎙️ Radio Compressor</span>
+            <span class="vocal-badge">Voice</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-compressor" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+        <div class="controls-body">
+          <div class="control-row">
+            <div class="label-group">
+              <span>Density (Threshold)</span>
+              <span id="val-compressor">-24 dB</span>
+            </div>
+            <input type="range" id="sl-compressor" min="-60" max="0" value="-24" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Pitch Shifter -->
+      <div class="fx-card vocal-fx" id="card-pitch">
+        <div class="fx-header" onclick="toggleAccordion('card-pitch', event)">
+          <div class="fx-title-block">
+            <span class="fx-title">🎭 Pitch Shifter</span>
+            <span class="vocal-badge">Voice</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-pitch" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+        <div class="controls-body">
+          <div class="control-row">
+            <div class="label-group">
+              <span>Voice Identity (Scale)</span>
+              <span id="val-pitch">Normal</span>
+            </div>
+            <input type="range" id="sl-pitch" min="0.5" max="1.5" value="1.0" step="0.05" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="category-section">
+      <div class="category-title">Filters, Drive & Space</div>
+
+      <!-- Walkie-Talkie -->
+      <div class="fx-card vocal-fx" id="card-phone">
+        <div class="fx-header" onclick="toggleAccordion('card-phone', event)">
+          <div class="fx-title-block">
+            <span class="fx-title">📻 Walkie-Talkie</span>
+            <span class="vocal-badge">Voice</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-phone" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+        <div class="controls-body">
+          <div class="control-row">
+            <div class="label-group">
+              <span>Band Center</span>
+              <span id="val-phone">1200 Hz</span>
+            </div>
+            <input type="range" id="sl-phone" min="400" max="2500" value="1200" step="50" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Distortion -->
+      <div class="fx-card" id="card-distort">
+        <div class="fx-header" onclick="toggleAccordion('card-distort', event)">
+          <span class="fx-title">🎸 Distortion</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-distort" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+        <div class="controls-body">
+          <div class="control-row">
+            <div class="label-group">
+              <span>Drive / Crunch</span>
+              <span id="val-distort">0%</span>
+            </div>
+            <input type="range" id="sl-distort" min="0" max="100" value="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Echo / Delay -->
+      <div class="fx-card" id="card-delay">
+        <div class="fx-header" onclick="toggleAccordion('card-delay', event)">
+          <span class="fx-title">🏔️ Echo / Delay</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-delay" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+        <div class="controls-body">
+          <div class="control-row">
+            <div class="label-group">
+              <span>Delay Time</span>
+              <span id="val-delay-time">0.3s</span>
+            </div>
+            <input type="range" id="sl-delay-time" min="0.1" max="1.0" value="0.3" step="0.05" />
+          </div>
+          <div class="control-row">
+            <div class="label-group">
+              <span>Feedback</span>
+              <span id="val-delay-fb">30%</span>
+            </div>
+            <input type="range" id="sl-delay-fb" min="0" max="90" value="30" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Reverb -->
+      <div class="fx-card" id="card-reverb">
+        <div class="fx-header" onclick="toggleAccordion('card-reverb', event)">
+          <span class="fx-title">⛪ Reverb (Environment)</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-reverb" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+        <div class="controls-body">
+          <div class="control-row">
+            <div class="label-group">
+              <span>Room Size / Mix</span>
+              <span id="val-reverb">50%</span>
+            </div>
+            <input type="range" id="sl-reverb" min="0" max="100" value="50" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions-grid">
+      <button class="btn btn-export-audio" id="btn-export-wav">
+        📥 Unduh File WAV
+      </button>
+      <button class="btn btn-pipeline" id="btn-toggle-pipeline">
+        💻 Ekspor Pipeline JS
+      </button>
+    </div>
+
+    <!-- Hidden Export JS Block -->
+    <div class="generator-card" id="pipeline-block">
+      <div class="generator-header">
+        <span style="font-size: 0.8rem; font-weight: 600; color: var(--accent-color);">💻 Exported Pipeline Code</span>
+        <button id="btn-copy" style="background:#334155; border:none; color:white; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">Copy</button>
+      </div>
+      <textarea id="code-output" readonly placeholder="// Kode Web Audio API Anda akan tampil di sini..."></textarea>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">🔔 <span id="toast-text">Notifikasi</span></div>
+
+  <!-- Loading Overlay -->
+  <div class="overlay" id="loading-overlay">
+    <div class="spinner"></div>
+    <div style="font-weight: 600;" id="overlay-msg">Sedang Memproses Audio...</div>
+  </div>
+
+  <script>
+    // Elements Setup
+    const audio = document.getElementById("audioTrack");
+    const fileInput = document.getElementById("file-input");
+    const dropZone = document.getElementById("drop-zone");
+    const uploadStatusText = document.getElementById("upload-status-text");
+    const fileBadge = document.getElementById("file-badge");
+    const visualizerCanvas = document.getElementById("visualizer-canvas");
+    const canvasCtx = visualizerCanvas.getContext("2d");
+
+    // Audio Context Realtime Variables
+    let ctx, source, analyser, masterGain, fxChainWetGain, absoluteMasterBypassGain;
+    let compressorNode, pitchNode, phoneNode, distortNode, delayNode, delayFeedback, reverbNode, reverbWetGain, dryPassThrough;
+    
+    let isInitialized = false;
+    let isGlobalActive = true;
+    let loadedAudioBuffer = null; // Stored ArrayBuffer of the uploaded file for offline processing
+    let currentFileName = "processed_audio.wav";
+
+    // Set demo audio source as default
+    const demoAudioUrl = "https://cdn.pixabay.com/download/audio/2022/03/13/audio_fff0dc9c9d.mp3";
+    audio.src = demoAudioUrl;
+
+    // Toast Notification System
+    function showNotification(text) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toast-text").textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    // Toggle FX Accordion Card expansion
+    window.toggleAccordion = function (cardId, event) {
+      if (
+        event.target.tagName === "INPUT" ||
+        event.target.className === "slider-toggle"
+      ) {
+        return;
+      }
+      const targetCard = document.getElementById(cardId);
+      const isAlreadyExpanded = targetCard.classList.contains("expanded");
+
+      document.querySelectorAll(".fx-card").forEach((card) => {
+        card.classList.remove("expanded");
+      });
+
+      if (!isAlreadyExpanded) {
+        targetCard.classList.add("expanded");
+      }
+    };
+
+    // Initialize Realtime Web Audio API Chain
+    function initAudio() {
+      if (isInitialized) return;
+
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      source = ctx.createMediaElementSource(audio);
+
+      // Create Analyser for visualization
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 128;
+
+      fxChainWetGain = ctx.createGain();
+      absoluteMasterBypassGain = ctx.createGain();
+
+      compressorNode = ctx.createDynamicsCompressor();
+      compressorNode.knee.value = 12;
+      compressorNode.ratio.value = 5;
+
+      // Realtime Pitch Shifter Node (ScriptProcessor)
+      pitchNode = ctx.createScriptProcessor(4096, 1, 1);
+      pitchNode.pitchRatio = 1.0;
+      pitchNode.onaudioprocess = function (e) {
+        const input = e.inputBuffer.getChannelData(0);
+        const output = e.outputBuffer.getChannelData(0);
+        if (pitchNode.pitchRatio === 1.0) {
+          output.set(input);
+          return;
+        }
+        for (let i = 0; i < input.length; i++) {
+          let idx = Math.floor(i * pitchNode.pitchRatio);
+          output[i] = idx < input.length ? input[idx] : 0;
+        }
+      };
+
+      phoneNode = ctx.createBiquadFilter();
+      phoneNode.type = "bandpass";
+      phoneNode.Q.value = 2.5;
+
+      distortNode = ctx.createWaveShaper();
+      distortNode.oversample = "4x";
+
+      delayNode = ctx.createDelay(1.0);
+      delayFeedback = ctx.createGain();
+      delayNode.connect(delayFeedback);
+      delayFeedback.connect(delayNode);
+
+      reverbNode = ctx.createConvolver();
+      createSyntheticReverbBuffer(ctx, (buf) => { if(buf) reverbNode.buffer = buf; });
+      reverbWetGain = ctx.createGain();
+      dryPassThrough = ctx.createGain();
+      masterGain = ctx.createGain();
+
+      // Routing Matrix Chain
+      source.connect(analyser);
+      
+      // Wet path (processed)
+      source.connect(compressorNode);
+      compressorNode.connect(pitchNode);
+      pitchNode.connect(phoneNode);
+      phoneNode.connect(distortNode);
+      distortNode.connect(delayNode);
+
+      delayNode.connect(reverbNode);
+      delayNode.connect(dryPassThrough);
+      reverbNode.connect(reverbWetGain);
+
+      reverbWetGain.connect(masterGain);
+      dryPassThrough.connect(masterGain);
+      masterGain.connect(fxChainWetGain);
+
+      // Dry bypass path
+      source.connect(absoluteMasterBypassGain);
+
+      // Outputs to speakers
+      fxChainWetGain.connect(ctx.destination);
+      absoluteMasterBypassGain.connect(ctx.destination);
+
+      updateCompressor();
+      updatePitch();
+      updatePhone();
+      updateDistortion();
+      updateDelay();
+      updateReverb();
+      updateGlobalMasterRouting();
+
+      isInitialized = true;
+      startVisualizer();
+    }
+
+    // Real-time Canvas Waveform Visualizer
+    function startVisualizer() {
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function draw() {
+        requestAnimationFrame(draw);
+        analyser.getByteTimeDomainData(dataArray);
+
+        canvasCtx.fillStyle = "#020617";
+        canvasCtx.fillRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+
+        canvasCtx.lineWidth = 2;
+        canvasCtx.strokeStyle = isGlobalActive ? "#38bdf8" : "#475569";
+        canvasCtx.beginPath();
+
+        const sliceWidth = visualizerCanvas.width / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = (v * visualizerCanvas.height) / 2;
+
+          if (i === 0) {
+            canvasCtx.moveTo(x, y);
+          } else {
+            canvasCtx.lineTo(x, y);
+          }
+          x += sliceWidth;
+        }
+
+        canvasCtx.lineTo(visualizerCanvas.width, visualizerCanvas.height / 2);
+        canvasCtx.stroke();
+      }
+      
+      // Match canvas resolution with CSS size
+      visualizerCanvas.width = visualizerCanvas.offsetWidth;
+      visualizerCanvas.height = visualizerCanvas.offsetHeight;
+      draw();
+    }
+
+    // Handles File uploads / processing
+    function handleFile(file) {
+      if (!file) return;
+      currentFileName = `processed_${file.name.split('.')[0]}.wav`;
+      
+      // Update UI Statuses
+      uploadStatusText.textContent = "Mengunggah: " + file.name;
+      fileBadge.style.display = "block";
+      fileBadge.textContent = `📁 File Aktif: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+
+      // Load file into elements
+      const fileUrl = URL.createObjectURL(file);
+      audio.src = fileUrl;
+
+      // Keep array buffer for offline exporting later
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        loadedAudioBuffer = e.target.result;
+        showNotification("File Audio berhasil dimuat!");
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Drag-over Events
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    // Synthesize procedural reverb impulse response
+    function createSyntheticReverbBuffer(audioCtx, callback) {
+      const rate = audioCtx.sampleRate;
+      const len = rate * 2.0; // 2 seconds
+      const buffer = audioCtx.createBuffer(2, len, rate);
+      for (let channel = 0; channel < 2; channel++) {
+        const data = buffer.getChannelData(channel);
+        for (let i = 0; i < len; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.0);
+        }
+      }
+      callback(buffer);
+    }
+
+    // Update real-time Node parameters on control inputs
+    function updateGlobalMasterRouting() {
+      if (!fxChainWetGain || !absoluteMasterBypassGain) return;
+      isGlobalActive = document.getElementById("toggle-global-master").checked;
+      const cards = document.querySelectorAll(".fx-card");
+      if (isGlobalActive) {
+        fxChainWetGain.gain.setTargetAtTime(1.0, ctx.currentTime, 0.02);
+        absoluteMasterBypassGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.02);
+        cards.forEach((card) => (card.style.opacity = "1"));
+      } else {
+        fxChainWetGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.02);
+        absoluteMasterBypassGain.gain.setTargetAtTime(1.0, ctx.currentTime, 0.02);
+        cards.forEach((card) => (card.style.opacity = "0.4"));
+      }
+    }
+
+    function updateCompressor() {
+      if (!compressorNode) return;
+      const thresh = parseInt(document.getElementById("sl-compressor").value);
+      document.getElementById("val-compressor").textContent = `${thresh} dB`;
+      const active = document.getElementById("toggle-compressor").checked;
+      compressorNode.threshold.setTargetAtTime(active ? thresh : 0, ctx.currentTime, 0.05);
+    }
+
+    function updatePitch() {
+      if (!pitchNode) return;
+      const active = document.getElementById("toggle-pitch").checked;
+      const rate = parseFloat(document.getElementById("sl-pitch").value);
+      document.getElementById("val-pitch").textContent = active ? `Factor x${rate}` : "Normal";
+      pitchNode.pitchRatio = active ? rate : 1.0;
+    }
+
+    function updatePhone() {
+      if (!phoneNode) return;
+      const active = document.getElementById("toggle-phone").checked;
+      const freq = document.getElementById("sl-phone").value;
+      document.getElementById("val-phone").textContent = `${freq} Hz`;
+      phoneNode.type = active ? "bandpass" : "allpass";
+      if (active) phoneNode.frequency.setTargetAtTime(freq, ctx.currentTime, 0.05);
+    }
+
+    function updateDistortion() {
+      if (!distortNode) return;
+      const active = document.getElementById("toggle-distort").checked;
+      const amount = parseInt(document.getElementById("sl-distort").value);
+      document.getElementById("val-distort").textContent = `${amount}%`;
+      if (!active || amount === 0) {
+        distortNode.curve = null;
+        return;
+      }
+      const k = amount * 2;
+      const curve = new Float32Array(ctx.sampleRate);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < ctx.sampleRate; ++i) {
+        const x = (i * 2) / ctx.sampleRate - 1;
+        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+      }
+      distortNode.curve = curve;
+    }
+
+    function updateDelay() {
+      if (!delayNode) return;
+      const active = document.getElementById("toggle-delay").checked;
+      const time = parseFloat(document.getElementById("sl-delay-time").value);
+      const fb = parseInt(document.getElementById("sl-delay-fb").value);
+      document.getElementById("val-delay-time").textContent = `${time}s`;
+      document.getElementById("val-delay-fb").textContent = `${fb}%`;
+      delayNode.delayTime.setTargetAtTime(active ? time : 0, ctx.currentTime, 0.05);
+      delayFeedback.gain.setTargetAtTime(active ? fb / 100 : 0, ctx.currentTime, 0.05);
+    }
+
+    function updateReverb() {
+      if (!reverbWetGain) return;
+      const active = document.getElementById("toggle-reverb").checked;
+      const mix = parseInt(document.getElementById("sl-reverb").value);
+      document.getElementById("val-reverb").textContent = `${mix}%`;
+      reverbWetGain.gain.setTargetAtTime(active ? (mix / 100) * 1.5 : 0, ctx.currentTime, 0.05);
+    }
+
+    // Init UI Listeners
+    function setupUIListener(toggleId, cardId, inputIds, callback) {
+      const toggle = document.getElementById(toggleId);
+      const card = document.getElementById(cardId);
+      toggle.addEventListener("change", () => {
+        initAudio();
+        if (toggle.checked) card.classList.add("active");
+        else card.classList.remove("active");
+        callback();
+      });
+      inputIds.forEach((id) =>
+        document.getElementById(id).addEventListener("input", () => {
+          initAudio();
+          callback();
+        })
+      );
+    }
+
+    setupUIListener("toggle-compressor", "card-compressor", ["sl-compressor"], updateCompressor);
+    setupUIListener("toggle-pitch", "card-pitch", ["sl-pitch"], updatePitch);
+    setupUIListener("toggle-phone", "card-phone", ["sl-phone"], updatePhone);
+    setupUIListener("toggle-distort", "card-distort", ["sl-distort"], updateDistortion);
+    setupUIListener("toggle-delay", "card-delay", ["sl-delay-time", "sl-delay-fb"], updateDelay);
+    setupUIListener("toggle-reverb", "card-reverb", ["sl-reverb"], updateReverb);
+
+    audio.addEventListener("play", () => {
+      initAudio();
+      if (ctx && ctx.state === "suspended") ctx.resume();
+    });
+
+    document.getElementById("toggle-global-master").addEventListener("change", updateGlobalMasterRouting);
+
+    // Toggle Pipeline Visual
+    document.getElementById("btn-toggle-pipeline").addEventListener("click", () => {
+      const block = document.getElementById("pipeline-block");
+      const isVisible = block.style.display === "block";
+      block.style.display = isVisible ? "none" : "block";
+      if (!isVisible) {
+        generatePipelineCode();
+      }
+    });
+
+    // Generates JS code for current audio routing config
+    function generatePipelineCode() {
+      const fx = {
+        compressor: document.getElementById("toggle-compressor").checked,
+        pitch: document.getElementById("toggle-pitch").checked,
+        phone: document.getElementById("toggle-phone").checked,
+        distort: document.getElementById("toggle-distort").checked,
+        delay: document.getElementById("toggle-delay").checked,
+        reverb: document.getElementById("toggle-reverb").checked
+      };
+
+      let code = `function setupCleanAudioPipeline(audioElement) {\n`;
+      code += `    const ctx = new (window.AudioContext || window.webkitAudioContext)();\n`;
+      code += `    const source = ctx.createMediaElementSource(audioElement);\n    let lastNode = source;\n\n`;
+
+      if (fx.compressor) {
+        code += `    const compressor = ctx.createDynamicsCompressor();\n    compressor.threshold.setValueAtTime(${document.getElementById("sl-compressor").value}, ctx.currentTime);\n    lastNode.connect(compressor); lastNode = compressor;\n\n`;
+      }
+      if (fx.pitch) {
+        code += `    const pitch = ctx.createScriptProcessor(4096, 1, 1);\n    pitch.pitchRatio = ${document.getElementById("sl-pitch").value};\n    pitch.onaudioprocess = function(e) { /* Linear stretching logic */ };\n    lastNode.connect(pitch); lastNode = pitch;\n\n`;
+      }
+      if (fx.phone) {
+        code += `    const phone = ctx.createBiquadFilter(); phone.type = 'bandpass'; phone.frequency.value = ${document.getElementById("sl-phone").value};\n    lastNode.connect(phone); lastNode = phone;\n\n`;
+      }
+      if (fx.distort) {
+        code += `    const distort = ctx.createWaveShaper(); /* Curve compiled at amount ${document.getElementById("sl-distort").value}% */\n    lastNode.connect(distort); lastNode = distort;\n\n`;
+      }
+
+      code += `    lastNode.connect(ctx.destination);\n    console.log("Audio pipeline loaded successfully!");\n}`;
+      document.getElementById("code-output").value = code;
+    }
+
+    // Clipboard Copy
+    document.getElementById("btn-copy").addEventListener("click", () => {
+      const textarea = document.getElementById("code-output");
+      textarea.select();
+      document.execCommand('copy');
+      const btn = document.getElementById("btn-copy");
+      btn.textContent = "✓ Copied!";
+      setTimeout(() => btn.textContent = "Copy", 2000);
+    });
+
+    // -------------------------------------------------------------
+    // OFFLINE AUDIO RENDERING ENGINE & EXPORTER (WAV)
+    // -------------------------------------------------------------
+    document.getElementById("btn-export-wav").addEventListener("click", async () => {
+      initAudio();
+      
+      const overlay = document.getElementById("loading-overlay");
+      const overlayMsg = document.getElementById("overlay-msg");
+      
+      let audioBufferToRender = null;
+
+      // Check if user uploaded a file, if not fetch the default demo file
+      if (loadedAudioBuffer) {
+        overlay.style.display = "flex";
+        overlayMsg.textContent = "Mendekode File Audio...";
+        try {
+          audioBufferToRender = await ctx.decodeAudioData(loadedAudioBuffer.slice(0));
+        } catch (err) {
+          overlay.style.display = "none";
+          showNotification("Gagal mendekode file audio.");
+          return;
+        }
+      } else {
+        overlay.style.display = "flex";
+        overlayMsg.textContent = "Mendownload File Demo untuk Diproses...";
+        try {
+          const response = await fetch(demoAudioUrl);
+          const arrayBuf = await response.arrayBuffer();
+          overlayMsg.textContent = "Mendekode Audio Demo...";
+          audioBufferToRender = await ctx.decodeAudioData(arrayBuf);
+        } catch (err) {
+          overlay.style.display = "none";
+          showNotification("Gagal memuat file audio demo dari jaringan.");
+          return;
+        }
+      }
+
+      overlayMsg.textContent = "Membuat Render Pipeline Efek...";
+
+      // Setup Offline Audio Context (matched duration and sample rate)
+      const sampleRate = audioBufferToRender.sampleRate;
+      const duration = audioBufferToRender.duration;
+      const offlineCtx = new OfflineAudioContext(
+        audioBufferToRender.numberOfChannels,
+        sampleRate * duration,
+        sampleRate
+      );
+
+      // Recreate Node routing inside the offline context
+      const offlineSource = offlineCtx.createBufferSource();
+      offlineSource.buffer = audioBufferToRender;
+
+      let lastNode = offlineSource;
+
+      // Apply master bypass rule
+      const isMasterActive = document.getElementById("toggle-global-master").checked;
+
+      if (isMasterActive) {
+        // 1. Radio Compressor
+        if (document.getElementById("toggle-compressor").checked) {
+          const offlineComp = offlineCtx.createDynamicsCompressor();
+          offlineComp.knee.value = 12;
+          offlineComp.ratio.value = 5;
+          offlineComp.threshold.setValueAtTime(parseInt(document.getElementById("sl-compressor").value), 0);
+          lastNode.connect(offlineComp);
+          lastNode = offlineComp;
+        }
+
+        // 2. Pitch Shifter (Offline implementation using playbackRate tuning for safety/quality)
+        if (document.getElementById("toggle-pitch").checked) {
+          const rate = parseFloat(document.getElementById("sl-pitch").value);
+          offlineSource.playbackRate.setValueAtTime(rate, 0);
+        }
+
+        // 3. Walkie-Talkie Filter
+        if (document.getElementById("toggle-phone").checked) {
+          const offlinePhone = offlineCtx.createBiquadFilter();
+          offlinePhone.type = "bandpass";
+          offlinePhone.Q.value = 2.5;
+          offlinePhone.frequency.setValueAtTime(parseInt(document.getElementById("sl-phone").value), 0);
+          lastNode.connect(offlinePhone);
+          lastNode = offlinePhone;
+        }
+
+        // 4. Distortion
+        if (document.getElementById("toggle-distort").checked) {
+          const amount = parseInt(document.getElementById("sl-distort").value);
+          if (amount > 0) {
+            const offlineDist = offlineCtx.createWaveShaper();
+            offlineDist.oversample = "4x";
+            const k = amount * 2;
+            const curve = new Float32Array(sampleRate);
+            const deg = Math.PI / 180;
+            for (let i = 0; i < sampleRate; ++i) {
+              const x = (i * 2) / sampleRate - 1;
+              curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+            }
+            offlineDist.curve = curve;
+            lastNode.connect(offlineDist);
+            lastNode = offlineDist;
+          }
+        }
+
+        // 5. Echo / Delay with feedback
+        if (document.getElementById("toggle-delay").checked) {
+          const offlineDelay = offlineCtx.createDelay(1.0);
+          const offlineDelayFb = offlineCtx.createGain();
+          const delayTime = parseFloat(document.getElementById("sl-delay-time").value);
+          const fbAmount = parseInt(document.getElementById("sl-delay-fb").value) / 100;
+
+          offlineDelay.delayTime.setValueAtTime(delayTime, 0);
+          offlineDelayFb.gain.setValueAtTime(fbAmount, 0);
+
+          lastNode.connect(offlineDelay);
+          offlineDelay.connect(offlineDelayFb);
+          offlineDelayFb.connect(offlineDelay); // Loop feedback
+          
+          // Re-route so we capture delayed signal
+          const merger = offlineCtx.createGain();
+          lastNode.connect(merger);
+          offlineDelay.connect(merger);
+          lastNode = merger;
+        }
+
+        // 6. Reverb Environment (Synthetic Impulse Response)
+        if (document.getElementById("toggle-reverb").checked) {
+          const offlineReverb = offlineCtx.createConvolver();
+          const offlineReverbGain = offlineCtx.createGain();
+          const offlineDryPass = offlineCtx.createGain();
+          const offlineSum = offlineCtx.createGain();
+
+          const mix = parseInt(document.getElementById("sl-reverb").value) / 100;
+
+          // Block for procedural reverb inside offline audio context
+          const revLen = sampleRate * 2.0;
+          const revBuffer = offlineCtx.createBuffer(2, revLen, sampleRate);
+          for (let ch = 0; ch < 2; ch++) {
+            const data = revBuffer.getChannelData(ch);
+            for (let i = 0; i < revLen; i++) {
+              data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / revLen, 2.0);
+            }
+          }
+          offlineReverb.buffer = revBuffer;
+
+          offlineReverbGain.gain.setValueAtTime(mix * 1.5, 0);
+          offlineDryPass.gain.setValueAtTime(1.0, 0);
+
+          lastNode.connect(offlineReverb);
+          offlineReverb.connect(offlineReverbGain);
+          lastNode.connect(offlineDryPass);
+
+          offlineReverbGain.connect(offlineSum);
+          offlineDryPass.connect(offlineSum);
+          lastNode = offlineSum;
+        }
+      }
+
+      // Connect final pipeline result node to output
+      lastNode.connect(offlineCtx.destination);
+
+      overlayMsg.textContent = "Melakukan Rendering Audio (WAV)...";
+      offlineSource.start(0);
+
+      // Trigger offline processing calculations
+      try {
+        const renderedBuffer = await offlineCtx.startRendering();
+        overlayMsg.textContent = "Mengompresi ke Format file WAV...";
+        
+        // Convert processed AudioBuffer directly to WAV Blob
+        const wavBlob = bufferToWav(renderedBuffer);
+        
+        // Create downlad link
+        const url = URL.createObjectURL(wavBlob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = currentFileName;
+        anchor.click();
+
+        // Release URL memory
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        overlay.style.display = "none";
+        showNotification("Berhasil mengekspor: " + currentFileName);
+      } catch (err) {
+        console.error(err);
+        overlay.style.display = "none";
+        showNotification("Proses rendering gagal.");
+      }
+    });
+
+    // -------------------------------------------------------------
+    // PCM TO RIFF/WAV COMPILER HELPER (16-bit stereo)
+    // -------------------------------------------------------------
+    function bufferToWav(buffer) {
+      let numOfChan = buffer.numberOfChannels,
+          length = buffer.length * numOfChan * 2 + 44,
+          bufferArr = new ArrayBuffer(length),
+          view = new DataView(bufferArr),
+          channels = [], i, sample,
+          offset = 0,
+          pos = 0;
+
+      // Write WAV Header Chunk
+      setUint32(0x46464952);                         // "RIFF" ID
+      setUint32(length - 8);                         // file length - 8
+      setUint32(0x45564157);                         // "WAVE" format
+      setUint32(0x20746d66);                         // "fmt " chunk header
+      setUint32(16);                                 // size of chunk (16 bytes)
+      setUint16(1);                                  // audio format: PCM (uncompressed)
+      setUint16(numOfChan);                          // channels count
+      setUint32(buffer.sampleRate);                  // sampling rate
+      setUint32(buffer.sampleRate * 2 * numOfChan);  // data rate / byte rate
+      setUint16(numOfChan * 2);                      // block align size
+      setUint16(16);                                 // bit depth: 16-bit
+      setUint32(0x61746164);                         // "data" chunk header
+      setUint32(length - pos - 4);                   // data chunk size
+
+      for (i = 0; i < numOfChan; i++) {
+        channels.push(buffer.getChannelData(i));
+      }
+
+      // Encode audio payload data
+      while (pos < length) {
+        for (i = 0; i < numOfChan; i++) {             
+          sample = Math.max(-1, Math.min(1, channels[i][offset])); // Hard clamp audio signals
+          sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF); // Scale range to 16-bit integers
+          view.setInt16(pos, sample, true);          // Write sample as little-endian
+          pos += 2;
+        }
+        offset++;
+      }
+
+      return new Blob([bufferArr], { type: "audio/wav" });
+
+      function setUint16(data) {
+        view.setUint16(pos, data, true);
+        pos += 2;
+      }
+
+      function setUint32(data) {
+        view.setUint32(pos, data, true);
+        pos += 4;
+      }
+    }
+  </script>
+</body>
+</html>
