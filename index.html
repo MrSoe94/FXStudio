@@ -66,12 +66,12 @@
     .file-uploader {
       border: 2px dashed #334155;
       border-radius: 1rem;
-      padding: 1.5rem;
+      padding: 1.25rem;
       text-align: center;
       background: rgba(15, 23, 42, 0.4);
       cursor: pointer;
       transition: all 0.25s ease;
-      margin-bottom: 1.25rem;
+      margin-bottom: 0.75rem;
     }
 
     .file-uploader:hover, .file-uploader.dragover {
@@ -80,14 +80,61 @@
     }
 
     .file-uploader p {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--text-main);
       margin-bottom: 0.25rem;
     }
 
     .file-uploader span {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
+    }
+
+    /* URL Input Section */
+    .url-input-container {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 0.75rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .url-input {
+      flex: 1;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      color: var(--text-main);
+      padding: 0.6rem 0.8rem;
+      border-radius: 0.6rem;
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .url-input:focus {
+      border-color: var(--accent-color);
+    }
+
+    .btn-url-load {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: var(--text-main);
+      padding: 0.6rem 1rem;
+      border-radius: 0.6rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-url-load:hover {
+      background: var(--accent-color);
+      color: #0b0f19;
+      border-color: var(--accent-color);
     }
 
     .file-info-badge {
@@ -450,6 +497,12 @@
       <span>Mendukung MP3, WAV, M4A, OGG, dll.</span>
     </div>
 
+    <!-- URL Input Section -->
+    <div class="url-input-container">
+      <input type="text" class="url-input" id="url-input" placeholder="Atau paste URL audio langsung (misal: link .mp3 / wav / dsb)...">
+      <button class="btn-url-load" id="btn-url-load">Muat Link</button>
+    </div>
+
     <!-- Loaded File Info Badge -->
     <div class="file-info-badge" id="file-badge"></div>
 
@@ -652,6 +705,8 @@
     const fileBadge = document.getElementById("file-badge");
     const visualizerCanvas = document.getElementById("visualizer-canvas");
     const canvasCtx = visualizerCanvas.getContext("2d");
+    const urlInput = document.getElementById("url-input");
+    const btnUrlLoad = document.getElementById("btn-url-load");
 
     // Audio Context Realtime Variables
     let ctx, source, analyser, masterGain, fxChainWetGain, absoluteMasterBypassGain;
@@ -671,7 +726,7 @@
       const toast = document.getElementById("toast");
       document.getElementById("toast-text").textContent = text;
       toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 3000);
+      setTimeout(() => toast.classList.remove("show"), 3500);
     }
 
     // Toggle FX Accordion Card expansion
@@ -847,6 +902,76 @@
       reader.readAsArrayBuffer(file);
     }
 
+    // Load Audio from direct URL
+    async function handleUrlLoad(url) {
+      const trimmedUrl = url.trim();
+      if (!trimmedUrl) return;
+
+      // Check for YouTube link
+      const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+      if (youtubeRegex.test(trimmedUrl)) {
+        showNotification("⚠️ Link YouTube terdeteksi! Karena batasan keamanan (CORS) YouTube, silakan konversi link Anda ke format MP3 terlebih dahulu menggunakan converter online, lalu paste link direct download-nya di sini.");
+        return;
+      }
+
+      const overlay = document.getElementById("loading-overlay");
+      const overlayMsg = document.getElementById("overlay-msg");
+      
+      overlay.style.display = "flex";
+      overlayMsg.textContent = "Mengunduh Audio dari URL...";
+
+      try {
+        const response = await fetch(trimmedUrl);
+        if (!response.ok) {
+          throw new Error("Gagal mengambil file. Pastikan URL tersebut benar dan mendukung izin CORS.");
+        }
+
+        const contentType = response.headers.get("content-type");
+        const isAudio = contentType && contentType.includes("audio");
+
+        const arrayBuf = await response.arrayBuffer();
+        loadedAudioBuffer = arrayBuf.slice(0); // Backup data
+
+        // Convert downloaded buffer into local blob for playing smoothly
+        const blobType = contentType || "audio/mpeg";
+        const audioBlob = new Blob([arrayBuf], { type: blobType });
+        const localBlobUrl = URL.createObjectURL(audioBlob);
+
+        // Assign to player
+        audio.src = localBlobUrl;
+
+        // Generate clean file name from URL
+        let urlName = "url_audio.mp3";
+        try {
+          const tempUrl = new URL(trimmedUrl);
+          const pathName = tempUrl.pathname;
+          const lastSegment = pathName.substring(pathName.lastIndexOf('/') + 1);
+          if (lastSegment && lastSegment.includes('.')) {
+            urlName = lastSegment;
+          }
+        } catch(e) {}
+
+        currentFileName = `processed_${urlName.split('.')[0]}.wav`;
+
+        // Update UI
+        uploadStatusText.textContent = "Dimuat dari URL: " + urlName;
+        fileBadge.style.display = "block";
+        fileBadge.textContent = `🌐 Link Aktif: ${urlName} (Dimuat dari internet)`;
+
+        overlay.style.display = "none";
+        showNotification("Audio dari URL berhasil dimuat!");
+      } catch (err) {
+        console.error(err);
+        overlay.style.display = "none";
+        showNotification("❌ Gagal mengunduh audio. Pastikan URL mengarah langsung ke file audio (.mp3/.wav) dan server tujuan mengizinkan CORS.");
+      }
+    }
+
+    // Trigger URL load on button click
+    btnUrlLoad.addEventListener("click", () => {
+      handleUrlLoad(urlInput.value);
+    });
+
     // Drag-over Events
     dropZone.addEventListener("dragover", (e) => {
       e.preventDefault();
@@ -901,6 +1026,7 @@
       }
     }
 
+    // Normalizing other FX
     function updateCompressor() {
       if (!compressorNode) return;
       const thresh = parseInt(document.getElementById("sl-compressor").value);
@@ -1087,7 +1213,7 @@
 
       overlayMsg.textContent = "Membuat Render Pipeline Efek...";
 
-      // Setup Offline Audio Context (matched duration and sample rate)
+      // Setup Offline Audio Context
       const sampleRate = audioBufferToRender.sampleRate;
       const duration = audioBufferToRender.duration;
       const offlineCtx = new OfflineAudioContext(
@@ -1102,7 +1228,6 @@
 
       let lastNode = offlineSource;
 
-      // Apply master bypass rule
       const isMasterActive = document.getElementById("toggle-global-master").checked;
 
       if (isMasterActive) {
@@ -1163,16 +1288,15 @@
 
           lastNode.connect(offlineDelay);
           offlineDelay.connect(offlineDelayFb);
-          offlineDelayFb.connect(offlineDelay); // Loop feedback
+          offlineDelayFb.connect(offlineDelay);
           
-          // Re-route so we capture delayed signal
           const merger = offlineCtx.createGain();
           lastNode.connect(merger);
           offlineDelay.connect(merger);
           lastNode = merger;
         }
 
-        // 6. Reverb Environment (Synthetic Impulse Response)
+        // 6. Reverb Environment
         if (document.getElementById("toggle-reverb").checked) {
           const offlineReverb = offlineCtx.createConvolver();
           const offlineReverbGain = offlineCtx.createGain();
@@ -1181,7 +1305,6 @@
 
           const mix = parseInt(document.getElementById("sl-reverb").value) / 100;
 
-          // Block for procedural reverb inside offline audio context
           const revLen = sampleRate * 2.0;
           const revBuffer = offlineCtx.createBuffer(2, revLen, sampleRate);
           for (let ch = 0; ch < 2; ch++) {
@@ -1216,17 +1339,14 @@
         const renderedBuffer = await offlineCtx.startRendering();
         overlayMsg.textContent = "Mengompresi ke Format file WAV...";
         
-        // Convert processed AudioBuffer directly to WAV Blob
         const wavBlob = bufferToWav(renderedBuffer);
         
-        // Create downlad link
         const url = URL.createObjectURL(wavBlob);
         const anchor = document.createElement("a");
         anchor.href = url;
         anchor.download = currentFileName;
         anchor.click();
 
-        // Release URL memory
         setTimeout(() => URL.revokeObjectURL(url), 1000);
 
         overlay.style.display = "none";
@@ -1256,7 +1376,7 @@
       setUint32(0x45564157);                         // "WAVE" format
       setUint32(0x20746d66);                         // "fmt " chunk header
       setUint32(16);                                 // size of chunk (16 bytes)
-      setUint16(1);                                  // audio format: PCM (uncompressed)
+      setUint16(1);                                  // audio format: PCM
       setUint16(numOfChan);                          // channels count
       setUint32(buffer.sampleRate);                  // sampling rate
       setUint32(buffer.sampleRate * 2 * numOfChan);  // data rate / byte rate
@@ -1272,9 +1392,9 @@
       // Encode audio payload data
       while (pos < length) {
         for (i = 0; i < numOfChan; i++) {             
-          sample = Math.max(-1, Math.min(1, channels[i][offset])); // Hard clamp audio signals
-          sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF); // Scale range to 16-bit integers
-          view.setInt16(pos, sample, true);          // Write sample as little-endian
+          sample = Math.max(-1, Math.min(1, channels[i][offset]));
+          sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF);
+          view.setInt16(pos, sample, true);
           pos += 2;
         }
         offset++;
